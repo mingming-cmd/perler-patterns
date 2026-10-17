@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拼豆系统 · Hama 色号图纸</title>
+<style>
+  :root {
+    --accent: #e4572e;
+    --accent-dark: #c94823;
+    --ink: #221c18;
+    --muted: #8a7f78;
+    --line: #ece5df;
+    --bg: #faf7f4;
+    --card: #ffffff;
+    --chip-bg: #f4efe9;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif; margin: 0; background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent; }
+  header { background: linear-gradient(135deg, #2b211c, #1a1512); color: #fff; padding: 18px 20px 16px; }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+  header p { margin: 6px 0 0; font-size: 12.5px; color: #cbbfb6; }
+  nav { display: flex; gap: 8px; padding: 14px 20px 0; max-width: 1100px; margin: 0 auto; }
+  nav button { flex: 1; border: 1px solid var(--line); background: #fff; padding: 10px 8px; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600; color: #5a514b; transition: all .15s; }
+  nav button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .page { display: none; padding: 16px 20px 48px; max-width: 1100px; margin: 0 auto; }
+  .page.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(60,40,20,.05); }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .row > * { flex: 1 1 300px; }
+  label { font-size: 13px; font-weight: 600; color: #5a514b; }
+  input[type="text"], input[type="number"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd6cf; border-radius: 10px; font-size: 14px; margin-top: 6px; outline: none; transition: border-color .15s, box-shadow .15s; }
+  input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(228,87,46,.15); }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .btn { border: 0; background: var(--accent); color: #fff; padding: 10px 18px; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .15s; }
+  .btn:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn.light { background: #f1ece8; color: var(--ink); }
+  .btn.light:hover { background: #e8e0d8; }
+  .btn.warn { background: #fdf0ee; color: #b03a2e; }
+  .btn.warn:hover { background: #fadbd6; }
+  .btn + .btn { margin-left: 8px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .actions .btn { margin-left: 0; }
+  .dropzone { margin-top: 8px; border: 2px dashed #d8cfc6; border-radius: 14px; padding: 22px 12px; text-align: center; cursor: pointer; transition: all .15s; background: #fdfbf9; }
+  .dropzone:hover { border-color: var(--accent); background: #fff6f2; }
+  .dropzone.drag { border-color: var(--accent); background: #fff0e9; transform: scale(1.01); }
+  .dz-icon { font-size: 28px; }
+  .dz-text { margin-top: 6px; font-size: 14px; font-weight: 600; }
+  .dz-sub { margin-top: 3px; font-size: 12px; color: var(--muted); }
+  .tabs { display: inline-flex; gap: 4px; background: var(--chip-bg); padding: 4px; border-radius: 999px; margin-bottom: 12px; }
+  .tabs button { border: 0; background: transparent; padding: 7px 16px; border-radius: 999px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: #6b615a; }
+  .tabs button.active { background: #fff; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  canvas.chart { border: 1px solid var(--line); border-radius: 10px; background: #fff; max-width: 100%; height: auto; cursor: crosshair; display: block; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 8px; border-bottom: 2px solid var(--line); font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  td { text-align: left; padding: 9px 8px; border-bottom: 1px solid #f3ede7; }
+  tbody tr:nth-child(even) { background: #fcfaf8; }
+  .swatch { display: inline-block; width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); vertical-align: middle; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; background: #fdecea; color: #c0392b; border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 10px; margin: 4px; font-size: 12.5px; cursor: pointer; background: #fff; transition: all .12s; }
+  .chip.owned { border-color: var(--accent); background: #fff2ec; font-weight: 600; }
+  .chip .swatch { width: 16px; height: 16px; }
+  .saved-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 6px; border-bottom: 1px solid #f3ede7; }
+  .color-strip { display: flex; flex-wrap: wrap; gap: 5px; max-height: 170px; overflow-y: auto; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: #fcfaf8; }
+  .color-strip button { width: 32px; height: 32px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: transform .1s; }
+  .color-strip button:hover { transform: scale(1.12); }
+  .color-strip button.sel { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(228,87,46,.25); }
+  .sel-info { font-size: 13px; margin: 8px 0; padding: 8px 12px; background: #f4efe9; border-radius: 10px; color: #5a514b; }
+  .suggest { margin-top: 10px; padding: 10px 12px; background: #fff2ec; border: 1px solid #f3d9cd; border-radius: 10px; font-size: 13px; color: #5a514b; line-height: 1.6; }
+  .suggest b { color: var(--accent-dark); }
+  .btn.mini { padding: 6px 12px; font-size: 12.5px; }
+  #sourcePreview { display: none; width: 100%; max-height: 140px; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; margin-top: 10px; background: #fff; }
+  #lockScreen { display: none; max-width: 460px; margin: 60px auto; padding: 28px 24px; background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 2px 10px rgba(60,40,20,.05); text-align: center; }
+  #lockScreen h2 { margin: 0 0 8px; font-size: 20px; }
+  #lockScreen p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+  #lockScreen input { text-align: center; letter-spacing: 2px; font-family: ui-monospace, monospace; text-transform: uppercase; }
+  #licenseError { color: #c0392b; font-size: 13px; min-height: 18px; margin-top: 8px; }
+  #licenseStatus { font-size: 12px; color: #cbbfb6; margin-top: 6px; }
+  #licenseStatus button { background: none; border: 0; color: #e8b4a0; cursor: pointer; font-size: 12px; text-decoration: underline; padding: 0; }
+  #printSection { display: none; }
+  @media print {
+    body { background: #fff; }
+    .app { display: none !important; }
+    #printSection { display: block !important; }
+    #printSection img { max-width: 100%; }
+    #printSection table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    #printSection th, #printSection td { border-bottom: 1px solid #ccc; padding: 5px; text-align: left; }
+  }
+  @media (max-width: 640px) {
+    header { padding: 14px 14px 12px; }
+    header h1 { font-size: 19px; }
+    nav { padding: 10px 12px 0; }
+    nav button { font-size: 13px; padding: 9px 4px; }
+    .page { padding: 12px 12px 40px; }
+    .card { padding: 14px; border-radius: 14px; }
+    .row { gap: 12px; }
+    .btn { padding: 10px 14px; font-size: 13.5px; }
+    table { font-size: 13px; }
+    th, td { padding: 7px 5px; }
+    .color-strip { max-height: 200px; }
+    .saved-item { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div id="lockScreen">
+  <h2>🧩 拼豆系统</h2>
+  <p>请输入激活码解锁使用。激活码在闲鱼购买，1 个码用 1 天（从激活那一刻起算 24 小时）。</p>
+  <input type="text" id="licenseInput" placeholder="例如 01-AB3K9Q-7X2M4P" autocomplete="off" onkeydown="if(event.key==='Enter')activateCode()">
+  <div style="margin-top:12px"><button class="btn" onclick="activateCode()">激活</button></div>
+  <div id="licenseError"></div>
+  <p>已购买？把卖家发你的码粘到上面点激活。没码请先去闲鱼下单。</p>
+</div>
+<div class="app" style="display:none">
+<header>
+  <h1>🧩 拼豆系统</h1>
+  <p>传图 → Hama 真实色号图纸 → 用豆清单 → 库存缺口 → 保存设计 → 打印图纸</p>
+  <div id="licenseStatus"></div>
+</header>
+<nav>
+  <button id="tabStudio" class="active" onclick="showPage('studio')">做图</button>
+  <button id="tabSaved" onclick="showPage('saved')">我的设计</button>
+  <button id="tabStock" onclick="showPage('stock')">我的豆子</button>
+</nav>
+
+<!-- ============ STUDIO ============ -->
+<div id="page-studio" class="page active">
+  <div class="row">
+    <div class="card">
+      <label>设计名称</label>
+      <input type="text" id="designName" value="爱心">
+      <div style="margin-top:12px">
+        <label>上传图片（照片或像素图）</label>
+        <div id="dropzone" class="dropzone" onclick="document.getElementById('fileInput').click()">
+          <div class="dz-icon">🖼️</div>
+          <div class="dz-text">点这里选图，或把图片拖进来</div>
+          <div class="dz-sub">支持 JPG / PNG / WebP</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <img id="sourcePreview" alt="原图预览">
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn light" onclick="loadHeart()">载入演示：爱心</button>
+      </div>
+      <div style="margin-top:14px">
+        <label>图纸宽度：<span id="widthLabel">29</span> 格（成品约 <span id="sizeLabel">14.5</span> cm 宽）</label>
+        <input type="range" id="widthSlider" min="8" max="120" value="29" oninput="onWidthChange()">
+        <div id="sizeSuggest" class="suggest" style="display:none">建议宽度：<b id="suggestVal">–</b> 格（<span id="suggestReason"></span>） <button class="btn light mini" onclick="applySuggest()">用这个尺寸</button></div>
+        <div class="hint" id="sizeEstimate">成品约 – × – cm</div>
+        <div class="hint">建议仅供参考，格数可随意调：越大越精细、豆子越多、成品越大。</div>
+      </div>
+      <div style="margin-top:10px">
+        <label><input type="checkbox" id="includeSpecial" onchange="regenerate()"> 包含特殊豆子（透明 / 夜光 / 珠光 / 金属）</label>
+        <div class="hint">默认只用常规不透明豆子。特殊豆子的屏幕色值和白天看起来不一样，容易配错。</div>
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn" onclick="saveDesign()">保存设计</button>
+        <button class="btn light" onclick="downloadPNG('color')">下载彩色图</button>
+        <button class="btn light" onclick="downloadPNG('code')">下载色号图</button>
+        <button class="btn light" onclick="printPattern()">打印图纸</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tabs">
+        <button id="viewColor" class="active" onclick="switchView('color')">彩色图</button>
+        <button id="viewCode" onclick="switchView('code')">色号图</button>
+      </div>
+      <canvas id="colorCanvas" class="chart" onclick="onCanvasClick(event)"></canvas>
+      <canvas id="codeCanvas" class="chart" style="display:none" onclick="onCanvasClick(event)"></canvas>
+      <div class="hint">点任意格子选中它，周围色号会列出来、点一下就能换成周围的颜色；也可以点下方色板换任意色；点橡皮擦可清空该格。</div>
+      <div class="sel-info" id="selInfo">未选中格子</div>
+      <div id="neighborBox" style="display:none">
+        <div class="hint" style="margin-bottom:6px">周围色号（点一下换成该色）：</div>
+        <div id="neighborColors"></div>
+      </div>
+      <div class="color-strip" id="colorStrip"></div>
+      <button class="btn light" onclick="eraseCell()">橡皮擦：清空选中格</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 8px">用豆清单 <span id="totalInfo" style="font-size:13px;color:#666"></span></h3>
+    <table>
+      <thead><tr><th>颜色</th><th>色号</th><th>色名</th><th>用豆数</th><th>库存</th></tr></thead>
+      <tbody id="beadList"></tbody>
+    </table>
+    <div class="hint">色值是屏幕近似值，下单买豆前请对照实物豆子核对。成品尺寸 ≈ 格数 × 0.5 cm。</div>
+  </div>
+</div>
+
+<!-- ============ SAVED ============ -->
+<div id="page-saved" class="page">
+  <div class="card">
+    <h3 style="margin:0 0 8px">我的设计</h3>
+    <div id="savedList"></div>
+    <div class="hint">设计保存在本浏览器里，换浏览器或清缓存会丢失。</div>
+  </div>
+</div>
+
+<!-- ============ STOCK ============ -->
+<div id="page-stock" class="page">
+  <div class="card">
+    <h3 style="margin:0 0 8px">我的豆子 <span id="stockInfo" style="font-size:13px;color:#666"></span></h3>
+    <div class="tabs">
+      <button class="active" onclick="setStockFilter('all', this)">全部</button>
+      <button onclick="setStockFilter('owned', this)">已有</button>
+      <button onclick="setStockFilter('missing', this)">没有</button>
+    </div>
+    <div id="stockGrid"></div>
+    <div class="hint">点一下色卡 = 标记有 / 没有。图纸的用豆清单会标出你缺的颜色。</div>
+  </div>
+</div>
+</div>
+
+<div id="printSection"></div>
+
+<script>
+// Hama Midi 全色卡 92 色：[色号, 色名, 色值]。来源：maxcleme/beadcolors 色卡表。
+const PALETTE = [
+["H01","White","#E5ECF1"],["H02","Cream","#E4E4C5"],["H03","Yellow","#E9C704"],
+["H04","Orange","#D14803"],["H05","Red","#B4060E"],["H06","Pink","#EA8AA5"],
+["H07","Purple","#712297"],["H08","Blue","#0239A3"],["H09","Light Blue","#025BC3"],
+["H10","Green","#027643"],["H11","Light Green","#19CDA7"],["H12","Brown","#3E271A"],
+["H13","Transparent Red","#C02435"],["H14","Transparent Yellow","#E4AA32"],["H15","Transparent Blue","#487ED5"],
+["H16","Transparent Green","#37B876"],["H17","Grey","#838F98"],["H18","Black","#141315"],
+["H19","Clear","#D8D2CE"],["H20","Reddish Brown","#8D2A0F"],["H21","Light Brown","#BE6C21"],
+["H22","Dark Red","#91020A"],["H24","Translucent Purple","#683E9A"],["H25","Translucent Brown","#87593D"],
+["H26","Matt Rose","#E8A498"],["H27","Beige","#DCB18E"],["H28","Dark Green","#1E2C1C"],
+["H29","Claret","#BF0142"],["H30","Burgundy","#4E0C1B"],["H31","Turquoise","#489AB9"],
+["H32","Neon Fuchsia","#FF208D"],["H33","Cerise","#FF3956"],["H34","Neon Yellow","#E5EF13"],
+["H35","Neon Red","#FF2833"],["H36","Neon Blue","#2353B0"],["H37","Neon Green","#06B73C"],
+["H38","Neon Orange","#FD8600"],["H39","Fluorescent Yellow","#F1F21C"],["H40","Fluorescent Orange","#FE630B"],
+["H41","Fluorescent Blue","#2659B2"],["H42","Fluorescent Green","#0CBD51"],["H43","Pastel Yellow","#E7E45A"],
+["H44","Pastel Red","#F96160"],["H45","Pastel Purple","#8E69CD"],["H46","Pastel Blue","#51AEE4"],
+["H47","Pastel Green","#80DF96"],["H48","Pastel Pink","#D67AD1"],["H49","Azure","#0FACD1"],
+["H55","Green (Glow in the Dark)","#FAF8ED"],["H56","Red (Glow in the Dark)","#EDBF9F"],["H57","Blue (Glow in the Dark)","#C4D0E3"],
+["H60","Teddybear Brown","#F0981E"],["H61","Gold","#D99350"],["H62","Silver","#48474A"],
+["H63","Bronze","#42312F"],["H64","Pearl","#EFEBE4"],["H70","Light Grey","#A5B3C0"],
+["H71","Dark Grey","#445059"],["H72","Translucent Pink","#F097B0"],["H73","Translucent Aqua","#59AEF5"],
+["H74","Translucent Lilac","#5B55BD"],["H75","Tan","#B78C6D"],["H76","Nougat","#8A5937"],
+["H77","Cloudy White","#CED1C8"],["H78","Light Peach","#F7C1AA"],["H79","Apricot","#F87633"],
+["H82","Plum","#91175A"],["H83","Petrol Blue","#037A9F"],["H84","Olive Green","#687836"],
+["H95","Pastel Rose","#DD9BA3"],["H96","Pastel Lilac","#B491AD"],["H97","Pastel Ice Blue","#8AAFC2"],
+["H98","Pastel Mint","#94CCA4"],["H101","Eucalyptus","#A9C39B"],["H102","Forest Green","#356B2D"],
+["H103","Light Yellow","#FFE660"],["H104","Lime","#BCD122"],["H105","Light Apricot","#FFAC78"],
+["H106","Light Lavender","#CCC5ED"],["H107","Lavender","#6A87C1"],["H108","Aubergine","#2A2536"],
+["H109","Cloudy Grey","#8A847F"],["H110","Matcha","#838956"],["H111","Dark Blush","#835854"],
+["H112","Blush","#AD8A82"],["H113","Aqua","#5F887B"],["H114","Cherry Red","#9A2C31"],
+["H115","Bright Green","#6E975F"],["H116","Midnight Blue","#222838"],["H117","Taupe Grey","#777169"],
+["H118","Maroon Red","#612932"],["H119","Sky Blue","#4167B4"]
+];
+const SPECIAL = new Set(["H13","H14","H15","H16","H19","H24","H25","H72","H73","H74","H55","H56","H57","H61","H62","H63","H64"]);
+const INFO = {};
+PALETTE.forEach(p => INFO[p[0]] = { name: p[1], hex: p[2] });
+function hexToRgb(h) { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+const RGB = {};
+PALETTE.forEach(p => RGB[p[0]] = hexToRgb(p[2]));
+
+function activeCodes() {
+  const inc = document.getElementById('includeSpecial').checked;
+  return PALETTE.map(p => p[0]).filter(c => inc || !SPECIAL.has(c));
+}
+function nearestCode(r, g, b) {
+  let best = null, bestD = Infinity;
+  for (const code of activeCodes()) {
+    const c = RGB[code];
+    const rm = (r + c[0]) / 2;
+    const d = (2 + rm/256)*(r-c[0])**2 + 4*(g-c[1])**2 + (2 + (255-rm)/256)*(b-c[2])**2;
+    if (d < bestD) { bestD = d; best = code; }
+  }
+  return best;
+}
+
+// ---- license: activation codes (self-built, front-end only) ----
+// The seller mints codes on admin-codes.html (same SECRET + same hash).
+// A code is: DD-SSSSSS-CCCCCC — DD = validity in days (01-99),
+// SSSSSS = random salt, CCCCCC = checksum over (SECRET + salt + days).
+// Activation starts the clock: the code is valid for DD*24h from the
+// moment it is activated in this browser. No server involved, so a
+// determined reader of this file can forge codes — acceptable for a
+// 0.99/day product; it keeps honest buyers honest.
+// ---- license pure functions (no DOM) ----
+const LICENSE_SECRET = '999430b55705ee42d8bb42799279d2fb';
+const CODE_ALPH = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789U';
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return h >>> 0;
+}
+function checkPart(salt, daysStr) {
+  let h = fnv1a(LICENSE_SECRET + '|' + salt + '|' + daysStr);
+  let out = '';
+  for (let i = 0; i < 6; i++) { h = (Math.imul(h, 1103515245) + 12345) >>> 0; out += CODE_ALPH[(h >>> 27) % 32]; }
+  return out;
+}
+function normalizeCode(input) {
+  return (input || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+function parseCode(input) {
+  const c = normalizeCode(input);
+  if (c.length !== 14) return null;
+  const days = parseInt(c.slice(0, 2), 10);
+  if (isNaN(days) || days < 1 || days > 99) return null;
+  return { days, salt: c.slice(2, 8), check: c.slice(8, 14), canon: c.slice(0, 2) + '-' + c.slice(2, 8) + '-' + c.slice(8, 14) };
+}
+function codeChecksumValid(input) {
+  const p = parseCode(input);
+  return !!p && checkPart(p.salt, String(p.days).padStart(2, '0')) === p.check;
+}
+// ---- end license pure functions ----
+function loadLicense() {
+  try { return JSON.parse(localStorage.getItem('perler-license')) || null; } catch (e) { return null; }
+}
+function licenseValid(lic) {
+  return !!lic && Date.now() < lic.expiresAt;
+}
+function usedCodes() {
+  try { return JSON.parse(localStorage.getItem('perler-used-codes')) || []; } catch (e) { return []; }
+}
+function applyLicenseUI() {
+  const lic = loadLicense();
+  const ok = licenseValid(lic);
+  document.getElementById('lockScreen').style.display = ok ? 'none' : 'block';
+  document.querySelector('.app').style.display = ok ? 'block' : 'none';
+  if (ok) {
+    const left = lic.expiresAt - Date.now();
+    const hh = Math.floor(left / 3600000), mm = Math.floor(left % 3600000 / 60000);
+    document.getElementById('licenseStatus').innerHTML =
+      `已激活 · 剩余约 ${hh} 小时 ${mm} 分 · <button onclick="deactivateCode()">更换激活码</button>`;
+  }
+  return ok;
+}
+function activateCode() {
+  const input = document.getElementById('licenseInput').value;
+  const err = document.getElementById('licenseError');
+  const p = parseCode(input);
+  if (!p) { err.textContent = '码的格式不对，应为 01-XXXXXX-XXXXXX 这样的 14 位码。'; return; }
+  if (!codeChecksumValid(input)) { err.textContent = '这个码不对，请核对后重新输入。'; return; }
+  if (usedCodes().includes(p.canon)) { err.textContent = '这个码已经用过了，一个码只能激活一次。'; return; }
+  const now = Date.now();
+  localStorage.setItem('perler-license', JSON.stringify({ code: p.canon, activatedAt: now, expiresAt: now + p.days * 86400000 }));
+  const used = usedCodes(); used.push(p.canon);
+  localStorage.setItem('perler-used-codes', JSON.stringify(used));
+  err.textContent = '';
+  applyLicenseUI();
+}
+function deactivateCode() {
+  if (!confirm('退出当前激活？之后需要重新输入激活码才能使用。')) return;
+  localStorage.removeItem('perler-license');
+  applyLicenseUI();
+}
+applyLicenseUI();
+
+// ---- state ----
+let grid = [];           // rows of (code | null)
+let cols = 0, rows = 0;
+let selected = null;     // {x, y}
+let currentView = 'color';
+let sourceImage = null;  // HTMLImageElement for re-quantize
+let stockFilter = 'all';
+
+function loadJSON(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; }
+}
+function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+function inventory() { return loadJSON('perler-inventory', {}); }
+
+function showPage(name) {
+  ['studio','saved','stock'].forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('active', p === name);
+    document.getElementById('tab' + p[0].toUpperCase() + p.slice(1)).classList.toggle('active', p === name);
+  });
+  if (name === 'saved') renderSaved();
+  if (name === 'stock') renderStock();
+}
+function switchView(v) {
+  currentView = v;
+  document.getElementById('viewColor').classList.toggle('active', v === 'color');
+  document.getElementById('viewCode').classList.toggle('active', v === 'code');
+  document.getElementById('colorCanvas').style.display = v === 'color' ? 'block' : 'none';
+  document.getElementById('codeCanvas').style.display = v === 'code' ? 'block' : 'none';
+}
+function onWidthChange() {
+  const w = +document.getElementById('widthSlider').value;
+  document.getElementById('widthLabel').textContent = w;
+  document.getElementById('sizeLabel').textContent = (w * 0.5).toFixed(1);
+  if (sourceImage) quantize(sourceImage, w);
+}
+function regenerate() { if (sourceImage) quantize(sourceImage, +document.getElementById('widthSlider').value); else if (grid.length) { render(); } }
+
+// ---- size suggestion (advisory only, never enforced) ----
+// Estimate image complexity from the number of distinct colours in a
+// small downsampled copy. Flat pixel art has a handful of colours,
+// simple illustrations a few hundred, busy photos several thousand.
+// The suggestion is just a starting point: the slider stays freely
+// adjustable from 8 to 120.
+let suggested = null;
+function suggestWidth(img) {
+  const w = Math.min(120, img.naturalWidth || img.width);
+  const h = Math.max(1, Math.round(w * (img.naturalHeight || img.height) / (img.naturalWidth || img.width)));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;
+  const seen = new Set();
+  for (let i = 0; i < d.length; i += 4) seen.add((d[i] << 16) | (d[i+1] << 8) | d[i+2]);
+  const n = seen.size;
+  if (n < 50) return { width: 28, reason: '颜色少、图案简单，小尺寸就够' };
+  if (n < 800) return { width: 40, reason: '图案简单，细节不多' };
+  if (n < 4000) return { width: 52, reason: '颜色和细节较多' };
+  return { width: 64, reason: '照片细节丰富，大尺寸更像' };
+}
+function updateSuggest(img) {
+  const s = suggestWidth(img);
+  suggested = s.width;
+  document.getElementById('suggestVal').textContent = s.width;
+  document.getElementById('suggestReason').textContent = s.reason;
+  document.getElementById('sizeSuggest').style.display = 'block';
+}
+function applySuggest() {
+  if (suggested == null) return;
+  document.getElementById('widthSlider').value = suggested;
+  onWidthChange();
+}
+
+// ---- image -> grid ----
+function quantize(img, maxW) {
+  const aspect = img.height / img.width;
+  const w = Math.min(maxW, img.width);
+  const h = Math.max(1, Math.round(w * aspect));
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(img, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  grid = [];
+  for (let y = 0; y < h; y++) {
+    const row = [];
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      row.push(data[i+3] < 128 ? null : nearestCode(data[i], data[i+1], data[i+2]));
+    }
+    grid.push(row);
+  }
+  cols = w; rows = h; selected = null;
+  trimGrid();
+  render();
+}
+function trimGrid() {
+  // drop fully-empty outer rows/cols so the pattern hugs the artwork
+  let top = 0, bottom = rows - 1, left = 0, right = cols - 1;
+  const rowEmpty = r => grid[r].every(c => !c);
+  const colEmpty = c => grid.every(r => !r[c]);
+  while (top <= bottom && rowEmpty(top)) top++;
+  while (bottom >= top && rowEmpty(bottom)) bottom--;
+  while (left <= right && colEmpty(left)) left++;
+  while (right >= left && colEmpty(right)) right--;
+  if (top > 0 || bottom < rows - 1 || left > 0 || right < cols - 1) {
+    grid = grid.slice(top, bottom + 1).map(r => r.slice(left, right + 1));
+    rows = grid.length; cols = grid[0].length;
+  }
+}
+
+// ---- render ----
+function cellSize() { return Math.max(8, Math.min(30, Math.floor(640 / Math.max(cols, 1)))); }
+function drawCharts() {
+  const cell = cellSize();
+  const cw = cols * cell + 1, ch = rows * cell + 1;
+  const cc = document.getElementById('colorCanvas');
+  cc.width = cw; cc.height = ch;
+  const cx = cc.getContext('2d');
+  cx.fillStyle = '#f2f2f2'; cx.fillRect(0, 0, cw, ch);
+  const kc = document.getElementById('codeCanvas');
+  kc.width = cw; kc.height = ch;
+  const kx = kc.getContext('2d');
+  kx.fillStyle = '#ffffff'; kx.fillRect(0, 0, cw, ch);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    const code = grid[y][x];
+    if (code) {
+      cx.fillStyle = INFO[code].hex;
+      cx.fillRect(x*cell, y*cell, cell, cell);
+      cx.strokeStyle = '#bbbbbb'; cx.strokeRect(x*cell+0.5, y*cell+0.5, cell-1, cell-1);
+      kx.fillStyle = INFO[code].hex;
+      kx.fillRect(x*cell, y*cell, cell, cell);
+      kx.strokeStyle = 'rgba(0,0,0,0.25)'; kx.strokeRect(x*cell+0.5, y*cell+0.5, cell-1, cell-1);
+      let fs = cell - 6;
+      kx.font = 'bold ' + fs + 'px sans-serif';
+      while (fs > 6 && kx.measureText(code).width > cell - 4) { fs--; kx.font = 'bold ' + fs + 'px sans-serif'; }
+      const rgb = hexToRgb(INFO[code].hex);
+      const lum = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
+      kx.fillStyle = lum < 140 ? '#ffffff' : '#000000';
+      kx.fillText(code, x*cell + (cell - kx.measureText(code).width)/2, y*cell + cell/2 + fs/3);
+    } else {
+      kx.strokeStyle = '#dddddd'; kx.strokeRect(x*cell+0.5, y*cell+0.5, cell-1, cell-1);
+    }
+  }
+  if (selected) {
+    const ctx = currentView === 'color' ? cx : kx;
+    ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 2;
+    ctx.strokeRect(selected.x*cell-1, selected.y*cell-1, cell+2, cell+2);
+    ctx.lineWidth = 1;
+  }
+}
+function renderBeadList() {
+  const counts = {};
+  grid.forEach(r => r.forEach(c => { if (c) counts[c] = (counts[c] || 0) + 1; }));
+  const inv = inventory();
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const ordered = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  document.getElementById('totalInfo').textContent =
+    `共 ${total} 颗 · ${ordered.length} 种颜色 · ${cols}×${rows} 格 · 约 ${(cols*0.5).toFixed(1)}×${(rows*0.5).toFixed(1)} cm`;
+  document.getElementById('beadList').innerHTML = ordered.map(code =>
+    `<tr><td><span class="swatch" style="background:${INFO[code].hex}"></span></td>` +
+    `<td>${code}</td><td>${INFO[code].name}</td><td>× ${counts[code]}</td>` +
+    `<td>${inv[code] ? '有' : '<span class="badge">缺</span>'}</td></tr>`
+  ).join('') || '<tr><td colspan="5">暂无图案，请上传图片或载入演示。</td></tr>';
+}
+function render() {
+  if (!grid.length) return;
+  drawCharts(); renderBeadList(); renderStrip(); renderNeighbors();
+  const total = grid.flat().filter(Boolean).length;
+  document.getElementById('sizeEstimate').textContent =
+    `成品约 ${(cols*0.5).toFixed(1)} × ${(rows*0.5).toFixed(1)} cm · 共 ${total} 颗`;
+}
+function renderStrip() {
+  const strip = document.getElementById('colorStrip');
+  strip.innerHTML = activeCodes().map(code =>
+    `<button title="${code} ${INFO[code].name}" style="background:${INFO[code].hex}" onclick="setCell('${code}')"></button>`
+  ).join('');
+}
+function onCanvasClick(e) {
+  if (!grid.length) return;
+  const canvas = e.target;
+  const rect = canvas.getBoundingClientRect();
+  const cell = cellSize();
+  const scaleX = canvas.width / rect.width;
+  const x = Math.floor((e.clientX - rect.left) * scaleX / cell);
+  const y = Math.floor((e.clientY - rect.top) * scaleX / cell);
+  if (x < 0 || y < 0 || x >= cols || y >= rows) return;
+  selected = { x, y };
+  const code = grid[y][x];
+  document.getElementById('selInfo').textContent =
+    `已选中：第 ${y+1} 行 第 ${x+1} 列，当前 ${code ? code + ' ' + INFO[code].name : '空格'}`;
+  drawCharts();
+  renderNeighbors();
+}
+function renderNeighbors() {
+  // List the distinct colour codes of the 8 cells around the selected one,
+  // most frequent first. One tap applies that colour to the selected cell:
+  // the fastest way to fix a stray bead (e.g. a lone wrong colour in a sky).
+  const box = document.getElementById('neighborBox');
+  if (!selected) { box.style.display = 'none'; return; }
+  const counts = {};
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    if (!dx && !dy) continue;
+    const nx = selected.x + dx, ny = selected.y + dy;
+    if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+    const c = grid[ny][nx];
+    if (c) counts[c] = (counts[c] || 0) + 1;
+  }
+  const codes = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  document.getElementById('neighborColors').innerHTML = codes.length
+    ? codes.map(code =>
+        `<button class="chip" onclick="setCell('${code}')"><span class="swatch" style="background:${INFO[code].hex}"></span>${code} ×${counts[code]}</button>`
+      ).join('')
+    : '<span class="hint">周围没有其他色号，用下方色板选色。</span>';
+  box.style.display = 'block';
+}
+function setCell(code) {
+  if (!selected) { alert('先点一下图纸里的格子，选中它再换色。'); return; }
+  grid[selected.y][selected.x] = code;
+  render();
+}
+function eraseCell() {
+  if (!selected) { alert('先点一下图纸里的格子。'); return; }
+  grid[selected.y][selected.x] = null;
+  render();
+}
+
+// ---- demo heart (original design) ----
+function loadHeart() {
+  const bitmap = [
+    "..RRR...RRR..",
+    ".RRWRRR.RRRR.",
+    ".RRWWRRRRRRR.",
+    "RRRRRRRRRRRRR",
+    "RRRRRDDDRRRRR",
+    ".RRRRDDDRRRR.",
+    "..RRRDDDRRR..",
+    "...RRDDRRR...",
+    "....RRRRR....",
+    ".....RRR.....",
+    "......R......"
+  ];
+  const px = { R: [230,0,18], D: [142,26,26], W: [255,255,255] };
+  const h = bitmap.length, w = bitmap[0].length;
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  const imgData = ctx.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const ch = bitmap[y][x], i = (y*w+x)*4;
+    if (px[ch]) { imgData.data[i]=px[ch][0]; imgData.data[i+1]=px[ch][1]; imgData.data[i+2]=px[ch][2]; imgData.data[i+3]=255; }
+  }
+  ctx.putImageData(imgData, 0, 0);
+  const img = new Image();
+  img.onload = () => {
+    sourceImage = img;
+    const pv = document.getElementById('sourcePreview');
+    pv.src = cv.toDataURL(); pv.style.display = 'block';
+    updateSuggest(img);
+    quantize(img, 60);
+  };
+  img.src = cv.toDataURL();
+  document.getElementById('designName').value = '爱心';
+}
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      sourceImage = img;
+      const pv = document.getElementById('sourcePreview');
+      pv.src = rd.result; pv.style.display = 'block';
+      updateSuggest(img);
+      document.getElementById('designName').value = f.name.replace(/\.[^.]+$/, '');
+      quantize(img, +document.getElementById('widthSlider').value);
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+
+// ---- drag & drop upload ----
+const dz = document.getElementById('dropzone');
+['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+dz.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  const dt = new DataTransfer();
+  dt.items.add(f);
+  const input = document.getElementById('fileInput');
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change'));
+});
+
+// ---- saved designs ----
+function saveDesign() {
+  if (!grid.length) { alert('先做一张图纸再保存。'); return; }
+  const name = document.getElementById('designName').value.trim() || '未命名';
+  const designs = loadJSON('perler-designs', []);
+  designs.push({ name, date: new Date().toLocaleString('zh-CN'), grid, cols, rows });
+  saveJSON('perler-designs', designs);
+  alert('已保存：' + name);
+}
+function renderSaved() {
+  const designs = loadJSON('perler-designs', []);
+  const el = document.getElementById('savedList');
+  if (!designs.length) { el.innerHTML = '<div class="hint">还没有保存的设计。</div>'; return; }
+  el.innerHTML = designs.map((d, i) => {
+    const total = d.grid.flat().filter(Boolean).length;
+    return `<div class="saved-item"><span><b>${d.name}</b> · ${d.cols}×${d.rows} 格 · ${total} 颗 · ${d.date}</span>` +
+      `<span><button class="btn light" onclick="loadDesign(${i})">打开</button> ` +
+      `<button class="btn warn" onclick="deleteDesign(${i})">删除</button></span></div>`;
+  }).join('');
+}
+function loadDesign(i) {
+  const d = loadJSON('perler-designs', [])[i];
+  if (!d) return;
+  grid = d.grid; cols = d.cols; rows = d.rows; selected = null;
+  sourceImage = null;
+  document.getElementById('designName').value = d.name;
+  render();
+  showPage('studio');
+}
+function deleteDesign(i) {
+  if (!confirm('确定删除这个设计？')) return;
+  const designs = loadJSON('perler-designs', []);
+  designs.splice(i, 1);
+  saveJSON('perler-designs', designs);
+  renderSaved();
+}
+
+// ---- inventory ----
+function setStockFilter(f, btn) {
+  stockFilter = f;
+  document.querySelectorAll('#page-stock .tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderStock();
+}
+function renderStock() {
+  const inv = inventory();
+  const owned = PALETTE.filter(p => inv[p[0]]).length;
+  document.getElementById('stockInfo').textContent = `已拥有 ${owned} / ${PALETTE.length} 色`;
+  const list = PALETTE.filter(p => {
+    if (stockFilter === 'owned') return inv[p[0]];
+    if (stockFilter === 'missing') return !inv[p[0]];
+    return true;
+  });
+  document.getElementById('stockGrid').innerHTML = list.map(p => {
+    const has = !!inv[p[0]];
+    return `<span class="chip ${has ? 'owned' : ''}" onclick="toggleStock('${p[0]}')">` +
+      `<span class="swatch" style="background:${p[2]}"></span>${p[0]} ${has ? '✓' : ''}</span>`;
+  }).join('');
+}
+function toggleStock(code) {
+  const inv = inventory();
+  inv[code] = !inv[code];
+  saveJSON('perler-inventory', inv);
+  renderStock();
+  renderBeadList();
+}
+
+// ---- export / print ----
+function downloadPNG(which) {
+  if (!grid.length) { alert('先做一张图纸。'); return; }
+  const name = (document.getElementById('designName').value.trim() || 'perler') + '_' + which;
+  const a = document.createElement('a');
+  a.download = name + '.png';
+  a.href = document.getElementById(which === 'color' ? 'colorCanvas' : 'codeCanvas').toDataURL('image/png');
+  a.click();
+}
+function printPattern() {
+  if (!grid.length) { alert('先做一张图纸。'); return; }
+  const counts = {};
+  grid.forEach(r => r.forEach(c => { if (c) counts[c] = (counts[c] || 0) + 1; }));
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const ordered = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  const name = document.getElementById('designName').value.trim() || '未命名';
+  const rowsHtml = ordered.map(code =>
+    `<tr><td>${code}</td><td>${INFO[code].name}</td><td>${INFO[code].hex}</td><td>× ${counts[code]}</td></tr>`).join('');
+  document.getElementById('printSection').innerHTML =
+    `<h2>${name} · 拼豆图纸</h2>` +
+    `<p>尺寸：${cols}×${rows} 格，约 ${(cols*0.5).toFixed(1)}×${(rows*0.5).toFixed(1)} cm · 共 ${total} 颗 · ${ordered.length} 种颜色</p>` +
+    `<h3>彩色图</h3><img src="${document.getElementById('colorCanvas').toDataURL()}">` +
+    `<h3>色号图（按色号抓豆）</h3><img src="${document.getElementById('codeCanvas').toDataURL()}">` +
+    `<h3>用豆清单</h3><table><tr><th>色号</th><th>色名</th><th>色值</th><th>用豆数</th></tr>${rowsHtml}</table>` +
+    `<p>熨烫说明：垫烘焙纸 / 熨烫纸，中火熨烫至豆子粘连，冷却后再取下。色值是屏幕近似值，买豆前请对照实物核对。</p>`;
+  window.print();
+}
+
+// ---- init: load the heart demo ----
+loadHeart();
+</script>
+</body>
+</html>
